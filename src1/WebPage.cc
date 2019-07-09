@@ -1,5 +1,4 @@
-#include "../include/WebPage.h"
-#include <algorithm>
+#include "WebPage.h"
 
 namespace  hk
 {
@@ -19,16 +18,47 @@ struct WordFreqCompare
 
 };
 
-WebPage::WebPage(string & doc,Configuration * conf,WordSegmentation & jieba )
-    :_doc(doc)
-     ,_conf(conf)
+WebPage::WebPage(string & doc,Configuration &  config,WordSegmentation & jieba )
 {
    // cout<<"WebPage()"<<endl;
     _topWords.reserve(10);
-    processDoc(doc,_conf,jieba);
+    processDoc(doc,config,jieba);
 }
 
-void WebPage::processDoc(const string & doc,Configuration * _conf ,WordSegmentation & jieba)
+string WebPage::summary(const vector<string> & queryWords)
+{
+    vector<string> summaryVec ;
+
+    istringstream iss(_docContent);
+    string line ;
+    while(iss>>line)
+    {
+        for(auto word : queryWords)
+        {
+            if(line.find(word) != string::npos)
+            {
+                summaryVec.push_back(line);
+                break ;
+            }
+        }
+
+        if(summaryVec.size() >= 5)
+        {
+            break ;
+        }
+    }
+
+    string summary ;
+    for(auto line:summaryVec)
+    {
+        summary.append(line).append("\n");
+    }
+    return summary ;
+}
+
+
+
+void WebPage::processDoc(const string & doc,Configuration & _config ,WordSegmentation & jieba)
 {
     string docIdHead = "<docid>";
     string docIdTail = "</docid>";
@@ -66,7 +96,7 @@ void WebPage::processDoc(const string & doc,Configuration * _conf ,WordSegmentat
 
     //分词
     vector<string> wordsVec = jieba(_docContent.c_str());
-    set<string> & stopWordList = _conf->getStopWordList();
+    StopWordList & stopWordList = _config.getStopWordList();
     calcTopK(wordsVec,TOPK_NUMBER,stopWordList);
 
 }

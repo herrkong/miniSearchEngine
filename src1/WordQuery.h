@@ -1,19 +1,28 @@
 #pragma once
+#include "Configuration.h"
+#include "WordSegmentation.h"
+#include "WebPage.h"
 #include <iostream>
 #include <vector>
 #include <unordered_map>
+#include <json/json.h>
 
 using namespace std;
 
 namespace  hk
 {
 
+    using  PageLib = unordered_map<int,WebPage> ;
+    using  OffsetLib = unordered_map<int,pair<int,int>>;
+    using  InvertIndexTable = unordered_map<string,set<pair<int,double>>>;
 
 class WordQuery
 {
 public:
-    WordQuery()
+    WordQuery(Configuration & config)
+    :_config(config)
     {
+        LoadLibrary();
         cout<<"WordQuery()"<<endl;
     }
     ~WordQuery()
@@ -21,14 +30,28 @@ public:
         cout<<"~WordQuery()"<<endl;
     }
 
-    string & doQuery();
 
-    void LoadLibrary();
+    string  doQuery(const string & queryWord);//执行查询 返回结果
+    
+    //计算查询词的权重值
+    vector<double> getQueryWordsWeightVector(vector<string> & queryWords);
+    
+    //执行查询
+    bool executeQuery(const vector<string> & queryWords,
+                      vector<pair<int,vector<double>>> & resultVec);
+
+    string   createJson(vector<int> & docIdVec,const vector<string> & queryWords);
+
+    string  returnNoAnswer();
+
+    void LoadLibrary(); //加载库文件
 
 private:
-    vector<string> _PageLib;  //网页库
-    unordered_map<int,pair<int,int>> _OffsetLib ; //偏移库
-    unordered_map<string,pair<int,double>> _InvertIndexTable ; //倒排索引
+    Configuration & _config ;//配置信息
+    WordSegmentation _jieba ;//jieba库分词对象
+    PageLib _PageLib;  //网页库
+    OffsetLib _OffsetLib ; //偏移库
+    InvertIndexTable  _invertIndexTable ; //倒排索引
 
 };
 
