@@ -9,13 +9,13 @@ int main()
     string configPath = "../conf/myconf.conf";
     Configuration config(configPath);
     config.loadConfigMap();
-   // config.print(); 
+    //config.print(); 
 
 
 //测试业务类WordQuery
     
     WordQuery wq(config);
-    string queryWord = "海洋";
+    string queryWord = "马云淘宝";
     Json::Reader reader ;
     Json::Value root ; 
     root  = wq.doQuery(queryWord);
